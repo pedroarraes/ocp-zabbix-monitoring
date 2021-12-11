@@ -1,0 +1,7 @@
+- name: This is a ansible script hello-world
+  hosts: localhost
+  connection: local
+  gather_facts: false  
+  tasks:
+    - name: Hello Ansible
+      shell: echo "Do something"

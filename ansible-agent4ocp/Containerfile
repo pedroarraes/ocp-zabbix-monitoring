@@ -1,0 +1,31 @@
+
+FROM quay.io/centos/centos:stream8
+
+USER root
+
+ENV HOME=/opt/scripts
+
+WORKDIR ${HOME}  
+
+RUN yum install epel-release -y && \
+    yum update -y && \
+    yum install ansible.noarch -y && \
+    yum clean all && \
+    curl https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz --output /tmp/oc.tar.gz && \
+    tar xvzf /tmp/oc.tar.gz && \
+    cp oc /usr/local/bin && \
+    rm oc kubectl && \
+    rm /tmp/oc.tar.gz && \
+    mkdir -pv ${HOME} && \
+    mkdir -pv ${HOME}/.ansible/tmp && \
+    mkdir -pv ${HOME}/.kube/ && \
+    mkdir -pv ${HOME}/playbooks && \
+    chown -R 1001:root ${HOME} &&  \
+    chgrp -R 0 ${HOME} && \
+    chmod -R g+rw ${HOME} 
+
+VOLUME ${HOME}/playbooks 
+
+USER 1001
+
+ADD example.yml ${HOME}/example.yml

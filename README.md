@@ -6,12 +6,14 @@ This smart-start describes the creation  an OpenShift project to monitoring PODS
 * OpenShift client (oc) or kubectl
 * OpenJDK 11 or Graalvm-11
 * Zabbix Server
+* podman or docker
 
 ## Summary
 
 * [Creating OpenShift Projects](#creating-openshift-projects)
   * [Monitoring API Project](#monitoring-api-project])
     * [Build ansible-agent4ocp](#build-ansible-agent4ocp)
+    * [Testing ansible-agent4ocp](#testing-ansible-agent4ocp)
     * [Pushing image](#pushing-image)
   * [APIs project](#apis-project)
     * [Deploying custumer-api](#deploying-custumer-api)
@@ -70,9 +72,30 @@ USER 1001
 
 ADD example.yml ${HOME}/example.yml #ansible example file
 ```
+```bash
+$ podman build ansible-agent4ocp/. --tag ansible-agent4ocp 
+```
+```console
+STEP 1/8: FROM quay.io/centos/centos:stream8
+STEP 2/8: USER root
+omitted
+3dae1ac7584c97e57296f674b42ac1886a88c180aec715860c8118712a81d683
+```
+#### Testing ansible-agent4ocp
+```bash
+$ podman run -it ansible-agent4ocp:latest ansible-playbook example.yml
+```
+```console
+[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
 
+PLAY [This is a ansible script hello-world] **************************************************************************************************************************************************************************************************
 
+TASK [Hello Ansible] *************************************************************************************************************************************************************************************************************************
+changed: [localhost]
 
+PLAY RECAP ***********************************************************************************************************************************************************************************************************************************
+localhost                  : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+```
 #### Pushing image
 
 ### APIs project

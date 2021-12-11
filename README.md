@@ -31,7 +31,7 @@ In this project we'll deploy ansible-agent4ocp to monitoring APIs PODs.
 $ oc new-project apis-monitoring
 ```
 ```console
-Now using project "apis-monitoring" on server "https://api.shared-na46.openshift.opentlc.com:6443".
+Now using project "apis-monitoring" on server "omitted".
 
 You can add applications to this project with the 'new-app' command. For example, try:
 
@@ -105,8 +105,13 @@ $ podman login -u $(oc whoami) -p $(oc whoami -t) <ocp-public-registry>
 Login Succeeded!
 ```
 #### Pushing image to OCP
+1. **Tag image**
 ```bash
 $ podman tag localhost/ansible-agent4ocp <ocp-public-registry>/apis-monitoring/ansible-agent4ocp
+```
+
+2. **Push Image**
+```bash
 $ podman push <ocp-public-registry>/apis-monitoring/ansible-agent4ocp
 ``` 
 ```console
@@ -116,7 +121,36 @@ omitted
 Storing signatures
 ```
 ### APIs project
+In this project we'll deploy example APIs.
+```bash
+$ oc new-project api
+``` 
+```console
+Now using project "api" on server "omitted".
 
+You can add applications to this project with the 'new-app' command. For example, try:
+
+    oc new-app centos/ruby-25-centos7~https://github.com/sclorg/ruby-ex.git
+
+to build a new example application in Ruby.
+
+```
 #### Deploying custumer-api
+1. **Building quarkus application**
+```bash
+$ cd customer-api/
+$ mvn package -Pnative
+```
+```console
+[INFO] Scanning for projects...
+omitted
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  01:06 min
+[INFO] Finished at: 2021-12-11T19:55:48-03:00
+[INFO] ------------------------------------------------------------------------
+```
+2. **Deploy application in OCP**
 
 #### Deploying inventory-api

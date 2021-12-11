@@ -1,20 +1,3 @@
-####
-# This podmanfile is used in order to build a container that runs the Quarkus application in native (no JVM) mode
-#
-# Before building the container image run:
-#
-# ./mvnw package -Pnative
-#
-# Then, build the image with:
-#
-# podman build -f src/main/podman/podmanfile.native -t quarkus/customer-api .
-#
-# Then run the container using:
-#
-# podman run -i --rm -p 8080:8080 quarkus/customer-api
-#
-###
-#FROM registry.access.redhat.com/ubi8/ubi-minimal:8.4
 FROM quay.io/centos/centos:stream8
 
 USER root

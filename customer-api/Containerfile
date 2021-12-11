@@ -1,0 +1,38 @@
+####
+# This podmanfile is used in order to build a container that runs the Quarkus application in native (no JVM) mode
+#
+# Before building the container image run:
+#
+# ./mvnw package -Pnative
+#
+# Then, build the image with:
+#
+# podman build -f src/main/podman/podmanfile.native -t quarkus/customer-api .
+#
+# Then run the container using:
+#
+# podman run -i --rm -p 8080:8080 quarkus/customer-api
+#
+###
+#FROM registry.access.redhat.com/ubi8/ubi-minimal:8.4
+FROM quay.io/centos/centos:stream8
+
+USER root
+
+WORKDIR /work/
+
+RUN chown 1001 /work 
+RUN chmod "g+rwX" /work 
+RUN chown 1001:root /work
+RUN curl https://repo.zabbix.com/zabbix/3.0/rhel/7/x86_64/zabbix-sender-3.0.9-1.el7.x86_64.rpm --output /tmp/zabbix-sender-3.0.9-1.el7.x86_64.rpm 
+RUN yum update -y
+RUN yum install /tmp/zabbix-sender-3.0.9-1.el7.x86_64.rpm -y
+RUN yum clean all
+
+COPY --chown=1001:root target/*-runner /work/application
+
+EXPOSE 8080
+
+USER 1001
+
+CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]

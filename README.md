@@ -14,7 +14,8 @@ This smart-start describes the creation  an OpenShift project to monitoring PODS
   * [Monitoring API Project](#monitoring-api-project])
     * [Build ansible-agent4ocp](#build-ansible-agent4ocp)
     * [Testing ansible-agent4ocp](#testing-ansible-agent4ocp)
-    * [Pushing image](#pushing-image)
+    * [Login in OCP public registry](#login-in-ocp-public-registry)
+    * [Pushing image to OCP](#pushing-image-to-ocp)
   * [APIs project](#apis-project)
     * [Deploying custumer-api](#deploying-custumer-api)
     * [Deploying inventory-api](#deploying-inventory-api)
@@ -96,8 +97,24 @@ changed: [localhost]
 PLAY RECAP ***********************************************************************************************************************************************************************************************************************************
 localhost                  : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
 ```
-#### Pushing image
-
+#### Login in OCP public registry
+```bash
+$ podman login -u $(oc whoami) -p $(oc whoami -t) <ocp-public-registry>
+```
+```console
+Login Succeeded!
+```
+#### Pushing image to OCP
+```bash
+$ podman tag localhost/ansible-agent4ocp <ocp-public-registry>/apis-monitoring/ansible-agent4ocp
+$ podman push <ocp-public-registry>/apis-monitoring/ansible-agent4ocp
+``` 
+```console
+Getting image source signatures
+Copying blob e7a4bda8f16d done  
+omitted
+Storing signatures
+```
 ### APIs project
 
 #### Deploying custumer-api

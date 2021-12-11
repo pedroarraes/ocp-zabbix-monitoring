@@ -22,12 +22,12 @@ This smart-start describes the creation  an OpenShift project to monitoring PODS
 
 ### Monitoring API Project
 
-### Build ansible-agent4ocp
+#### Build ansible-agent4ocp
 
-### Pushing image
+#### Pushing image
 
-## APIs project
+### APIs project
 
-### Deploying custumer-api
+#### Deploying custumer-api
 
-### Deploying inventory-api
+#### Deploying inventory-api

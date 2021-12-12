@@ -363,7 +363,7 @@ In this session we'll scheduler OpenShift CronJobs to get metrics PODS and send 
 ### Getting Service Account Token
 This command is used to get secret value and will be used in Ansible Script.
 ```bash
-oc describe secret $(oc describe sa sa-apis-monitoring -n apis-monitoring | awk  '{if(NR==8) print $2}') -n apis-monitoring | grep token | awk '{if(NR==3) print $2'}
+$ oc describe secret $(oc describe sa sa-apis-monitoring -n apis-monitoring | awk  '{if(NR==8) print $2}') -n apis-monitoring | grep token | awk '{if(NR==3) print $2'}
 ```
 ```console
 omitted
@@ -375,7 +375,8 @@ omitted
   hosts: localhost
   tasks:
   - name: OCP Autentication
-    shell: oc login --token=eyJhbGciOiJSUzI1NiIsImtpZCI6IllJVzRHTGUxUVhENDZLRWxYUlBrWkpXTGdBQ3F6Tm9xMHpWSjMxMVVENTQifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJhcGlzLW1vbml0b3JpbmciLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlY3JldC5uYW1lIjoic2EtYXBpcy1tb25pdG9yaW5nLXRva2VuLWJqOXg4Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6InNhLWFwaXMtbW9uaXRvcmluZyIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImE0ODcyMmQxLTYzYjctNDIwMi04ZTA2LWY4ZWJiYWUxMmNlNCIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDphcGlzLW1vbml0b3Jpbmc6c2EtYXBpcy1tb25pdG9yaW5nIn0.H174VrIdlaYf2RhToARVwbGSe7TeTnrBCPm_XHsLWdtsjkjPsLFUUyeJTw73AVOlJns_Red4b91db5Vlih14Akg6KlmTOsN0eiWc8_6dpuxTWIVMGpty9lxlNKOX9OGX7TkJ0rp44oR-zNlsk9YcUMFzz7MG7fciwHsjAFhI6N73xXupgfv0p_nh5MXcMyyDGWH0HPryAM6NWNi8nhgmGbmNvoD5gvUdMB5FMXRaxmKAriWFBTTtAFn1f7YTaKWHdmOKwyk1pTesRE3nmKcFUGlfVwPMY6gZgmCTJeMjkFhPvwh2Z6lg3Yzvwxf7tGEt7_HzI0wacJwzClZ1dJ9MRg --server=https://api.shared-na46.openshift.opentlc.com:6443
+    #Use the script at last session to take token
+    shell: oc login --token=<omitted> --server=<omitted>
 - name: Get PODS
   hosts: localhost
   tasks:
@@ -388,6 +389,38 @@ omitted
     shell: oc rsh {{ item }} zabbix_sender -vv -z <zabbix_server_host> -s <zabbix_registered_api>  -k free_memory -o $(oc rsh {{ item }} free | awk '{if(NR==2) print $4}')
     with_items: "{{ pods_list.stdout_lines }}"
 ```
+```bash
+$ oc create configmap free-memory --from-file=ansible-scripts/free-memory.yml -n apis-monitoring
+```
+```console
+configmap/free-memory created
+```
 ### Creating Ansible File as Config MAP to get used memory PODS
+```yaml
+- name: Get POD used memory
+  hosts: localhost
+  tasks:
+  - name: OCP Autentication
+    #Use the script at last session to take token
+    shell: oc login --token=<omitted> --server=<omitted>
+- name: Get PODS
+  hosts: localhost
+  tasks:
+  - name: Go to API project
+    shell: oc project api
+  - name: Get PODs
+    shell: oc get pods -n api | grep Running | awk {'print $1'}
+    register: pods_list  
+  - name: Get used memory
+    shell: oc rsh {{ item }} zabbix_sender -vv -z <zabbix_server_host> -s <zabbix_registered_api>  -k free_memory -o $(oc rsh {{ item }} free | awk '{if(NR==2) print $3}')
+    with_items: "{{ pods_list.stdout_lines }}"
+```
+```bash
+$ oc create configmap used-memory --from-file=ansible-scripts/used-memory.yml -n apis-monitoring
+```
+```console
+configmap/used-memory created
+```
 ### Configuring CronJob for custumer-api
+
 ### Configuring CronJob for inventory-api

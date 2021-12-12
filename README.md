@@ -40,7 +40,7 @@ You can add applications to this project with the 'new-app' command. For example
 to build a new example application in Ruby.
 ```
 #### Build ansible-agent4ocp
-This is the containerfile for ansible-agent4ocp
+This is the Dockerfile for ansible-agent4ocp
 ```dockerfile
 FROM quay.io/centos/centos:stream8 #base image
 
@@ -206,10 +206,11 @@ omitted
 $ oc expose svc/inventory-api
 ```
 ```console
+route.route.openshift.io/inventory-api exposed
 ``` 
 3. **Testing api**
 ```bash
-$ curl $(oc get route inventory | awk 'FNR==2{print $2}')/hello
+$ curl $(oc get route inventory-api | awk 'FNR==2{print $2}')/hello
 ```
 ```console
 Hello RESTEasy
@@ -219,10 +220,20 @@ Hello RESTEasy
 $ oc get pods
 ```
 ```console
+customer-api-1-build     0/1       Completed   0          35m
+customer-api-1-c2rrx     1/1       Running     0          33m
+customer-api-1-deploy    0/1       Completed   0          33m
+inventory-api-1-deploy   0/1       Completed   0          2m19s
+inventory-api-1-fswtb    1/1       Running     0          2m15s
+inventory-api-3-build    0/1       Completed   0          4m46s
+
 ```
 ```bash
-$ 
+$ oc rsh inventory-api-1-fswtb zabbix_sender
 ```
 ```console
-
+zabbix_sender [23]: either '-c' or '-z' option must be specified
+usage:
+omitted
+command terminated with exit code 1
 ```

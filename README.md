@@ -422,5 +422,103 @@ $ oc create configmap used-memory --from-file=ansible-scripts/used-memory.yml -n
 configmap/used-memory created
 ```
 ### Configuring CronJob for custumer-api
-
+```yaml
+kind: CronJob
+apiVersion: batch/v1beta1
+metadata:
+  name: free-memory
+spec:
+  schedule: '*/5 * * * *'
+  concurrencyPolicy: Allow
+  suspend: false
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+    spec:
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          volumes:
+            - name: free-memory
+              configMap:
+                name: free-memory
+                defaultMode: 420
+          containers:
+            - name: ansible-agent4ocp
+              image: >-
+                image-registry.openshift-image-registry.svc:5000/apis-monitoring/ansible-agent4ocp
+              args:
+                - /bin/sh
+                - '-c'
+                - ansible-playbook playbooks/free-memory.yml
+              resources: {}
+              volumeMounts:
+                - name: free-memory
+                  mountPath: /opt/scripts/playbooks
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              imagePullPolicy: Always
+          restartPolicy: OnFailure
+          terminationGracePeriodSeconds: 30
+          dnsPolicy: ClusterFirst
+          securityContext: {}
+          schedulerName: default-scheduler
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+```
+```console
+cronjob.batch/free-memory created
+```
 ### Configuring CronJob for inventory-api
+```yaml
+kind: CronJob
+apiVersion: batch/v1beta1
+metadata:
+  name: used-memory
+spec:
+  schedule: '*/5 * * * *'
+  concurrencyPolicy: Allow
+  suspend: false
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+    spec:
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          volumes:
+            - name: used-memory
+              configMap:
+                name: used-memory
+                defaultMode: 420
+          containers:
+            - name: ansible-agent4ocp
+              image: >-
+                image-registry.openshift-image-registry.svc:5000/apis-monitoring/ansible-agent4ocp
+              args:
+                - /bin/sh
+                - '-c'
+                - ansible-playbook playbooks/used-memory.yml
+              resources: {}
+              volumeMounts:
+                - name: used-memory
+                  mountPath: /opt/scripts/playbooks
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              imagePullPolicy: Always
+          restartPolicy: OnFailure
+          terminationGracePeriodSeconds: 30
+          dnsPolicy: ClusterFirst
+          securityContext: {}
+          schedulerName: default-scheduler
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+```
+```bash
+$ oc create -f cronjobs/used-memory-jobs.yml -n apis-monitoring
+```
+```console
+cronjob.batch/used-memory created
+```

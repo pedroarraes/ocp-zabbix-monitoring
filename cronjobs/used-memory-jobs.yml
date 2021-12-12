@@ -1,0 +1,43 @@
+kind: CronJob
+apiVersion: batch/v1beta1
+metadata:
+  name: used-memory
+spec:
+  schedule: '*/5 * * * *'
+  concurrencyPolicy: Allow
+  suspend: false
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+    spec:
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          volumes:
+            - name: used-memory
+              configMap:
+                name: used-memory
+                defaultMode: 420
+          containers:
+            - name: ansible-agent4ocp
+              image: >-
+                image-registry.openshift-image-registry.svc:5000/apis-monitoring/ansible-agent4ocp
+              args:
+                - /bin/sh
+                - '-c'
+                - ansible-playbook playbooks/used-memory.yml
+              resources: {}
+              volumeMounts:
+                - name: used-memory
+                  mountPath: /opt/scripts/playbooks
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              imagePullPolicy: Always
+          restartPolicy: OnFailure
+          terminationGracePeriodSeconds: 30
+          dnsPolicy: ClusterFirst
+          securityContext: {}
+          schedulerName: default-scheduler
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1

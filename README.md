@@ -330,7 +330,24 @@ $ oc create role projectview --verb=get,list --resource=project -n api
 ```console
 role.rbac.authorization.k8s.io/projectview created
 ```
-
+```bash
+$ oc create role projectview --verb=get,list --resource=project -n apis-monitoring
+```
+```console
+role.rbac.authorization.k8s.io/projectview created
+```
+```bash
+$ oc create role saview --verb=get,list,watch --resource=serviceaccounts -n apis-monitoring
+```
+```console
+role.rbac.authorization.k8s.io/projectview created
+```
+```bash
+$ oc create role secretsview --verb=get,list,watch --resource=secrets -n apis-monitoring
+```
+```console
+role.rbac.authorization.k8s.io/projectview created
+```
 3. **Adding policy to service account**
 ```bash
 $ oc adm policy add-role-to-user podexec system:serviceaccount:apis-monitoring:sa-apis-monitoring --role-namespace=api -n api
@@ -344,10 +361,36 @@ $ oc adm policy add-role-to-user projectview system:serviceaccount:apis-monitori
 ```console
 role "projectview" added: "system:serviceaccount:apis-monitoring:sa-apis-monitoring"
 ```
+```bash
+$ oc adm policy add-role-to-user projectview system:serviceaccount:apis-monitoring:sa-apis-monitoring --role-namespace=apis-monitoring -n apis-monitoring
+```
+```console
+role "projectview" added: "system:serviceaccount:apis-monitoring:sa-apis-monitoring"
+```
+```bash
+$ oc adm policy add-role-to-user saview system:serviceaccount:apis-monitoring:sa-apis-monitoring --role-namespace=apis-monitoring -n apis-monitoring
+```
+```console
+role "saview" added: "system:serviceaccount:apis-monitoring:sa-apis-monitoring"
+```
+```bash
+$ oc adm policy add-role-to-user secretsview system:serviceaccount:apis-monitoring:sa-apis-monitoring --role-namespace=apis-monitoring -n apis-monitoring
+```
+```console
+role "secretsview" added: "system:serviceaccount:apis-monitoring:sa-apis-monitoring"
+```
 
 ## Scheduling OpenShift CronJobs
+In this session we'll scheduler OpenShift CronJobs to get metrics PODS and send to Zabbix Server
 
 ### Getting Service Account Token
+This command is used to get secret value and will be used in Ansible Script.
+```bash
+oc describe secret $(oc describe sa sa-apis-monitoring -n apis-monitoring | awk  '{if(NR==8) print $2}') -n apis-monitoring | grep token | awk '{if(NR==3) print $2'}
+```
+```console
+omitted
+```
 
 ### Creating Ansible File as Config MAP for custumer-api
 ### Creating Ansible File as Config MAP for inventory-api

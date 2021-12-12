@@ -319,7 +319,13 @@ serviceaccount/sa-apis-monitoring created
 
 2. **Creating custom role binding to get and exec pods**
 ```bash
-$ oc create role podexec --verb=create,delete,deletecollection,get,list,patch,update,watch --resource=pod -n api
+$ oc create role podview --verb=get,list,watch --resource=pods -n api
+```
+```console
+role.rbac.authorization.k8s.io/podview created
+```
+```bash
+$ oc create role podexec --verb=create --resource=pods/exec -n api
 ```
 ```console
 role.rbac.authorization.k8s.io/podexec created
@@ -330,56 +336,27 @@ $ oc create role projectview --verb=get,list --resource=project -n api
 ```console
 role.rbac.authorization.k8s.io/projectview created
 ```
-```bash
-$ oc create role projectview --verb=get,list --resource=project -n apis-monitoring
-```
-```console
-role.rbac.authorization.k8s.io/projectview created
-```
-```bash
-$ oc create role saview --verb=get,list,watch --resource=serviceaccounts -n apis-monitoring
-```
-```console
-role.rbac.authorization.k8s.io/projectview created
-```
-```bash
-$ oc create role secretsview --verb=get,list,watch --resource=secrets -n apis-monitoring
-```
-```console
-role.rbac.authorization.k8s.io/projectview created
-```
 3. **Adding policy to service account**
+```bash
+$ oc adm policy add-role-to-user podview system:serviceaccount:apis-monitoring:sa-apis-monitoring --role-namespace=api -n api
+```
+```console
+role "podview" added: "system:serviceaccount:apis-monitoring:sa-apis-monitoring"
+```
+
 ```bash
 $ oc adm policy add-role-to-user podexec system:serviceaccount:apis-monitoring:sa-apis-monitoring --role-namespace=api -n api
 ```
 ```console
 role "podexec" added: "system:serviceaccount:apis-monitoring:sa-apis-monitoring"
 ```
+
 ```bash
 $ oc adm policy add-role-to-user projectview system:serviceaccount:apis-monitoring:sa-apis-monitoring --role-namespace=api -n api
 ```
 ```console
 role "projectview" added: "system:serviceaccount:apis-monitoring:sa-apis-monitoring"
 ```
-```bash
-$ oc adm policy add-role-to-user projectview system:serviceaccount:apis-monitoring:sa-apis-monitoring --role-namespace=apis-monitoring -n apis-monitoring
-```
-```console
-role "projectview" added: "system:serviceaccount:apis-monitoring:sa-apis-monitoring"
-```
-```bash
-$ oc adm policy add-role-to-user saview system:serviceaccount:apis-monitoring:sa-apis-monitoring --role-namespace=apis-monitoring -n apis-monitoring
-```
-```console
-role "saview" added: "system:serviceaccount:apis-monitoring:sa-apis-monitoring"
-```
-```bash
-$ oc adm policy add-role-to-user secretsview system:serviceaccount:apis-monitoring:sa-apis-monitoring --role-namespace=apis-monitoring -n apis-monitoring
-```
-```console
-role "secretsview" added: "system:serviceaccount:apis-monitoring:sa-apis-monitoring"
-```
-
 ## Scheduling OpenShift CronJobs
 In this session we'll scheduler OpenShift CronJobs to get metrics PODS and send to Zabbix Server
 
@@ -392,8 +369,25 @@ oc describe secret $(oc describe sa sa-apis-monitoring -n apis-monitoring | awk 
 omitted
 ```
 
-### Creating Ansible File as Config MAP for custumer-api
-teste
-### Creating Ansible File as Config MAP for inventory-api
+### Creating Ansible File as Config MAP to get free memory PODS
+```yaml
+- name: Get POD free memory
+  hosts: localhost
+  tasks:
+  - name: OCP Autentication
+    shell: oc login --token=eyJhbGciOiJSUzI1NiIsImtpZCI6IllJVzRHTGUxUVhENDZLRWxYUlBrWkpXTGdBQ3F6Tm9xMHpWSjMxMVVENTQifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJhcGlzLW1vbml0b3JpbmciLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlY3JldC5uYW1lIjoic2EtYXBpcy1tb25pdG9yaW5nLXRva2VuLWJqOXg4Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6InNhLWFwaXMtbW9uaXRvcmluZyIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImE0ODcyMmQxLTYzYjctNDIwMi04ZTA2LWY4ZWJiYWUxMmNlNCIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDphcGlzLW1vbml0b3Jpbmc6c2EtYXBpcy1tb25pdG9yaW5nIn0.H174VrIdlaYf2RhToARVwbGSe7TeTnrBCPm_XHsLWdtsjkjPsLFUUyeJTw73AVOlJns_Red4b91db5Vlih14Akg6KlmTOsN0eiWc8_6dpuxTWIVMGpty9lxlNKOX9OGX7TkJ0rp44oR-zNlsk9YcUMFzz7MG7fciwHsjAFhI6N73xXupgfv0p_nh5MXcMyyDGWH0HPryAM6NWNi8nhgmGbmNvoD5gvUdMB5FMXRaxmKAriWFBTTtAFn1f7YTaKWHdmOKwyk1pTesRE3nmKcFUGlfVwPMY6gZgmCTJeMjkFhPvwh2Z6lg3Yzvwxf7tGEt7_HzI0wacJwzClZ1dJ9MRg --server=https://api.shared-na46.openshift.opentlc.com:6443
+- name: Get PODS
+  hosts: localhost
+  tasks:
+  - name: Go to API project
+    shell: oc project api
+  - name: Get PODs
+    shell: oc get pods -n api | grep Running | awk {'print $1'}
+    register: pods_list  
+  - name: Get free memory
+    shell: oc rsh {{ item }} zabbix_sender -vv -z <zabbix_server_host> -s <zabbix_registered_api>  -k free_memory -o $(oc rsh {{ item }} free | awk '{if(NR==2) print $4}')
+    with_items: "{{ pods_list.stdout_lines }}"
+```
+### Creating Ansible File as Config MAP to get used memory PODS
 ### Configuring CronJob for custumer-api
 ### Configuring CronJob for inventory-api

@@ -10,4 +10,7 @@
     shell: oc project api
   - name: Get PODs
     shell: oc get pods -n api | grep Running | awk {'print $1'}
-    register: lista_pods  
+    register: pods_list  
+  - name: Get free memory
+    shell: oc rsh {{ item }} zabbix_sender -vv -z <zabbix_server_host> -s <zabbix_registered_api>  -k free_memory -o $(oc rsh {{ item }} free | awk '{if(NR==2) print $4}')
+    with_items: "{{ pods_list.stdout_lines }}"

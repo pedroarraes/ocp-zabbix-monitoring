@@ -20,6 +20,12 @@ This smart-start describes the creation  an OpenShift project to monitoring PODS
     * [Deploying custumer-api](#deploying-custumer-api)
     * [Deploying inventory-api](#deploying-inventory-api)
 * [Configuring service account](#configuring-service-account)    
+* [Scheduling OpenShift CronJobs](#scheduling-openshift-cronjobs) 
+  * [Getting Service Account Token](#getting-service-account-token)
+  * [Creating Ansible File as Config MAP for custumer-api](#creating-ansible-file-as-config-map-for-custumer-api)
+  * [Creating Ansible File as Config MAP for inventory-api](#creating-ansible-file-as-config-map-for-inventory-api)
+  * [Configuring CronJob for custumer-api](#configuring-cronjob-for-custumer-api)
+  * [Configuring CronJob for inventory-api](#configuring-cronjobf-for-inventory-api)
 
 
 ## Creating OpenShift Projects
@@ -338,3 +344,12 @@ $ oc adm policy add-role-to-user projectview system:serviceaccount:apis-monitori
 ```console
 role "projectview" added: "system:serviceaccount:apis-monitoring:sa-apis-monitoring"
 ```
+
+## Scheduling OpenShift CronJobs
+
+### Getting Service Account Token
+
+### Creating Ansible File as Config MAP for custumer-api
+### Creating Ansible File as Config MAP for inventory-api
+### Configuring CronJob for custumer-api
+### Configuring CronJob for inventory-api

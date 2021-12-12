@@ -136,21 +136,53 @@ to build a new example application in Ruby.
 
 ```
 #### Deploying custumer-api
-1. **Building quarkus application**
+
+1. **Deploying application in OCP**
 ```bash
-$ cd customer-api/
-$ mvn package -Pnative
+$ oc new-app https://github.com/pedroarraes/ocp-zabbix-monitoring.git --context-dir=/customer-api --strategy=docker --name=customer-api
 ```
 ```console
-[INFO] Scanning for projects...
-omitted
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time:  01:06 min
-[INFO] Finished at: 2021-12-11T19:55:48-03:00
-[INFO] ------------------------------------------------------------------------
-```
-2. **Deploy application in OCP**
+--> Found Docker image dc28896 (5 weeks old) from quay.io for "quay.io/centos/centos:stream8"
 
+    CentOS Stream 8 
+    --------------- 
+    The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.
+
+omitted
+
+    Run 'oc status' to view your app.
+```
+2. **Exposing application**
+```bash
+$ oc expose svc/customer-api
+```
+```console
+route.route.openshift.io/customer-api exposed
+``` 
+3. **Testing api**
+```bash
+$ curl $(oc get routes | awk 'FNR==2{print $2}')/hello
+```
+```console
+Hello RESTEasy
+```
+4. **Testing Zabbix Sender**
+```bash
+$ oc get pods
+```
+```console
+NAME                    READY     STATUS      RESTARTS   AGE
+customer-api-1-build    0/1       Completed   0          12m
+customer-api-1-c2rrx    1/1       Running     0          10m
+customer-api-1-deploy   0/1       Completed   0          10m
+```
+```bash
+$ oc rsh customer-api-1-c2rrx zabbix_sender
+```
+```console
+zabbix_sender [23]: either '-c' or '-z' option must be specified
+usage:
+omitted
+command terminated with exit code 1
+```
 #### Deploying inventory-api

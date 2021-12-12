@@ -19,6 +19,7 @@ This smart-start describes the creation  an OpenShift project to monitoring PODS
   * [APIs project](#apis-project)
     * [Deploying custumer-api](#deploying-custumer-api)
     * [Deploying inventory-api](#deploying-inventory-api)
+* [Configuring service account](#configuring-service-account)    
 
 
 ## Creating OpenShift Projects
@@ -297,4 +298,43 @@ zabbix_sender [23]: either '-c' or '-z' option must be specified
 usage:
 omitted
 command terminated with exit code 1
+```
+
+## Configuring service account
+In this session we will create e configure service account permission to access OpenShift PODS, get metrics and send to Zabbix Server using Zabbix Sender.
+
+1. **Creating service account**
+```bash
+$ oc create sa sa-apis-monitoring -n apis-monitoring
+```
+```console
+serviceaccount/sa-apis-monitoring created
+```
+
+2. **Creating custom role binding to get and exec pods**
+```bash
+$ oc create role podexec --verb=create,delete,deletecollection,get,list,patch,update,watch --resource=pod -n api
+```
+```console
+role.rbac.authorization.k8s.io/podexec created
+```
+```bash
+$ oc create role projectview --verb=get,list --resource=project -n api
+```
+```console
+role.rbac.authorization.k8s.io/projectview created
+```
+
+3. **Adding policy to service account**
+```bash
+$ oc adm policy add-role-to-user podexec system:serviceaccount:apis-monitoring:sa-apis-monitoring --role-namespace=api -n api
+```
+```console
+role "podexec" added: "system:serviceaccount:apis-monitoring:sa-apis-monitoring"
+```
+```bash
+$ oc adm policy add-role-to-user projectview system:serviceaccount:apis-monitoring:sa-apis-monitoring --role-namespace=api -n api
+```
+```console
+role "projectview" added: "system:serviceaccount:apis-monitoring:sa-apis-monitoring"
 ```

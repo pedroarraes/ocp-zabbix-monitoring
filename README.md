@@ -42,24 +42,31 @@ to build a new example application in Ruby.
 #### Build ansible-agent4ocp
 This is the Dockerfile for ansible-agent4ocp
 ```dockerfile
-FROM quay.io/centos/centos:stream8 #base image
+#base image
+FROM quay.io/centos/centos:stream8 
 
 USER root
 
-ENV HOME=/opt/scripts #workdir folder
+#workdir folder
+ENV HOME=/opt/scripts 
 
 WORKDIR ${HOME}  
 
-RUN yum install epel-release -y && \ #CentoOS Stream extras repositories
-    yum update -y && \ #update SO
-    yum install ansible.noarch -y && \ #intall ansible
+#CentoOS Stream extras repositories
+RUN yum install epel-release -y && \ 
+    #updating SO
+    yum update -y && \ 
+    yum install ansible.noarch -y && \ 
+    #install ansible
     yum clean all && \
-    curl https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz --output /tmp/oc.tar.gz && \ #download and install OpenShift Client
+    #download and install OpenShift client
+    curl https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz --output /tmp/oc.tar.gz && \ 
     tar xvzf /tmp/oc.tar.gz && \
     cp oc /usr/local/bin && \
     rm oc kubectl && \
     rm /tmp/oc.tar.gz && \
-    mkdir -pv ${HOME} && \  #Granting permissions to folders and files
+    #Granting permissions to folders and files
+    mkdir -pv ${HOME} && \  
     mkdir -pv ${HOME}/.ansible/tmp && \
     mkdir -pv ${HOME}/.kube/ && \
     mkdir -pv ${HOME}/playbooks && \
@@ -67,11 +74,13 @@ RUN yum install epel-release -y && \ #CentoOS Stream extras repositories
     chgrp -R 0 ${HOME} && \
     chmod -R g+rw ${HOME} 
 
-VOLUME ${HOME}/playbooks #folder to save playbooks
+#folder to save playbooks
+VOLUME ${HOME}/playbooks 
 
 USER 1001
 
-ADD example.yml ${HOME}/example.yml #ansible example file
+#ansible example file
+ADD example.yml ${HOME}/example.yml 
 ```
 ```bash
 $ podman build ansible-agent4ocp/. --tag ansible-agent4ocp 
@@ -144,13 +153,15 @@ USER root
 
 WORKDIR /work/
 
-RUN chown 1001 /work && 
-RUN chmod "g+rwX" /work 
-RUN chown 1001:root /work
-RUN curl https://repo.zabbix.com/zabbix/3.0/rhel/7/x86_64/zabbix-sender-3.0.9-1.el7.x86_64.rpm --output /tmp/zabbix-sender-3.0.9-1.el7.x86_64.rpm 
-RUN yum update -y
-RUN yum install /tmp/zabbix-sender-3.0.9-1.el7.x86_64.rpm -y
-RUN yum clean all
+RUN chown 1001 /work && \
+    chmod "g+rwX" /work && \
+    chown 1001:root /work && \
+    #SO Update
+    yum update -y && \
+    #Zabbix Sender Install
+    curl https://repo.zabbix.com/zabbix/3.0/rhel/7/x86_64/zabbix-sender-3.0.9-1.el7.x86_64.rpm --output /tmp/zabbix-sender-3.0.9-1.el7.x86_64.rpm && \ 
+    yum install /tmp/zabbix-sender-3.0.9-1.el7.x86_64.rpm -y && \
+    yum clean all 
 
 COPY --chown=1001:root target/*-runner /work/application
 
@@ -160,7 +171,6 @@ USER 1001
 
 CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]
 ```
-
 
 1. **Deploying application in OCP**
 ```bash
@@ -211,6 +221,32 @@ omitted
 command terminated with exit code 1
 ```
 #### Deploying inventory-api
+```dockerfile
+FROM quay.io/centos/centos:stream8
+
+USER root
+
+WORKDIR /work/
+
+RUN chown 1001 /work && \
+    chmod "g+rwX" /work && \
+    chown 1001:root /work && \
+    #SO Update
+    yum update -y && \
+    #Zabbix Sender Install
+    curl https://repo.zabbix.com/zabbix/3.0/rhel/7/x86_64/zabbix-sender-3.0.9-1.el7.x86_64.rpm --output /tmp/zabbix-sender-3.0.9-1.el7.x86_64.rpm && \ 
+    yum install /tmp/zabbix-sender-3.0.9-1.el7.x86_64.rpm -y && \
+    yum clean all 
+
+COPY --chown=1001:root target/*-runner /work/application
+
+EXPOSE 8080
+
+USER 1001
+
+CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]
+```
+
 ```bash
 $ oc new-app https://github.com/pedroarraes/ocp-zabbix-monitoring.git --context-dir=/inventory-api --strategy=docker --name=inventory-api
 ```

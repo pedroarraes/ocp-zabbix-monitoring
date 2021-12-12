@@ -161,7 +161,7 @@ route.route.openshift.io/customer-api exposed
 ``` 
 3. **Testing api**
 ```bash
-$ curl $(oc get routes | awk 'FNR==2{print $2}')/hello
+$ curl $(oc get route customer-api | awk 'FNR==2{print $2}')/hello
 ```
 ```console
 Hello RESTEasy
@@ -186,3 +186,43 @@ omitted
 command terminated with exit code 1
 ```
 #### Deploying inventory-api
+```bash
+$ oc new-app https://github.com/pedroarraes/ocp-zabbix-monitoring.git --context-dir=/inventory-api --strategy=docker --name=inventory-api
+```
+```console
+--> Found Docker image dc28896 (5 weeks old) from quay.io for "quay.io/centos/centos:stream8"
+
+    CentOS Stream 8 
+    --------------- 
+    The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.
+
+omitted
+
+    Run 'oc status' to view your app.
+
+```
+2. **Exposing application**
+```bash
+$ oc expose svc/inventory-api
+```
+```console
+``` 
+3. **Testing api**
+```bash
+$ curl $(oc get route inventory | awk 'FNR==2{print $2}')/hello
+```
+```console
+Hello RESTEasy
+```
+4. **Testing Zabbix Sender**
+```bash
+$ oc get pods
+```
+```console
+```
+```bash
+$ 
+```
+```console
+
+```

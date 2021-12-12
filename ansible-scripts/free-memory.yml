@@ -1,0 +1,13 @@
+- name: Get POD free memory
+  hosts: localhost
+  tasks:
+  - name: OCP Autentication
+    shell: oc login --token=eyJhbGciOiJSUzI1NiIsImtpZCI6IllJVzRHTGUxUVhENDZLRWxYUlBrWkpXTGdBQ3F6Tm9xMHpWSjMxMVVENTQifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJhcGlzLW1vbml0b3JpbmciLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlY3JldC5uYW1lIjoic2EtYXBpcy1tb25pdG9yaW5nLXRva2VuLWJqOXg4Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6InNhLWFwaXMtbW9uaXRvcmluZyIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImE0ODcyMmQxLTYzYjctNDIwMi04ZTA2LWY4ZWJiYWUxMmNlNCIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDphcGlzLW1vbml0b3Jpbmc6c2EtYXBpcy1tb25pdG9yaW5nIn0.H174VrIdlaYf2RhToARVwbGSe7TeTnrBCPm_XHsLWdtsjkjPsLFUUyeJTw73AVOlJns_Red4b91db5Vlih14Akg6KlmTOsN0eiWc8_6dpuxTWIVMGpty9lxlNKOX9OGX7TkJ0rp44oR-zNlsk9YcUMFzz7MG7fciwHsjAFhI6N73xXupgfv0p_nh5MXcMyyDGWH0HPryAM6NWNi8nhgmGbmNvoD5gvUdMB5FMXRaxmKAriWFBTTtAFn1f7YTaKWHdmOKwyk1pTesRE3nmKcFUGlfVwPMY6gZgmCTJeMjkFhPvwh2Z6lg3Yzvwxf7tGEt7_HzI0wacJwzClZ1dJ9MRg --server=https://api.shared-na46.openshift.opentlc.com:6443
+- name: Get PODS
+  hosts: localhost
+  tasks:
+  - name: Go to API project
+    shell: oc project api
+  - name: Get PODs
+    shell: oc get pods -n api | grep Running | awk {'print $1'}
+    register: lista_pods  
